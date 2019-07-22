@@ -1,0 +1,21 @@
+{
+  "name": "party",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npx nodemon index.js\" \"npx parcel index.html\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@clusterws/cws": "^0.15.0",
+    "nanoid": "^2.0.3"
+  },
+  "devDependencies": {
+    "concurrently": "^4.1.1",
+    "nodemon": "^1.19.1",
+    "parcel-bundler": "^1.12.3"
+  }
+}
