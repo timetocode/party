@@ -41,9 +41,17 @@ const onPartyNotFound = (data) => {
 
 const onCreate = (data) => {
 	const member = Object.assign({}, data)
-	delete member.type
+	delete member.action
 	state.members.set(member.id, member)
 	state.log.push(`Member added ${member.id}`)
+}
+
+const onStart = (data) => {
+	const url = data.url
+	console.log('Start GAME!', url)
+	state.log.push(`Start game ${url}`)
+	// TODO: actually launch the game 
+	// also save our partyId and pass it to the server if teams are a thing
 }
 
 
@@ -52,13 +60,14 @@ const actions = {
 	identity: onIdentity,
 	create: onCreate,
 	delete: onDelete,
-	'party-not-found': onPartyNotFound
+	'party-not-found': onPartyNotFound,
+	start: onStart
 }
 
 const onMessage = (event) => {
 	const data = JSON.parse(event.data)
 	
-	const action = actions[data.type]
+	const action = actions[data.action]
 	if (typeof action === 'function') {
 		action(data)
 		render(state)
@@ -96,6 +105,10 @@ const createParty = () => {
 const leaveParty = (socket, partyId, memberId) => {
 	socket.send(JSON.stringify({ action: 'leaveParty', partyId, memberId }))
 	onClose()
+}
+
+const start = (socket, partyId) => {
+	socket.send(JSON.stringify({ action: 'start', partyId }))
 }
 
 
@@ -154,5 +167,9 @@ window.onload = () => {
 
 	document.getElementById('leaveParty').addEventListener('click', () => {
 		leaveParty(socket, state.partyId, state.memberId)
+	})
+
+	document.getElementById('start').addEventListener('click', () => {
+		start(socket, state.partyId)
 	})
 }

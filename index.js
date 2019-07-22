@@ -11,7 +11,7 @@ const send = (socket, obj) => {
 
 const sendIdentity = (party, member, socket) => {
 	const payload = {
-		type: 'identity',
+		action: 'identity',
 		partyId: party.id,
 		memberId: member.state.id,
 		isLeader: party.leader === member
@@ -22,10 +22,10 @@ const sendIdentity = (party, member, socket) => {
 
 // TODO for custom data added to members
 const updateMember = (member, prop, value) => {
-	// TODO validate props! __proto__ etc would be dangerous
+	// TODO validate props! wouldn't want someone changing `__proto__` 
 	state.member.state[prop] = value
 	const payload = {
-		type: 'update',
+		action: 'update',
 		memberId: member.state.id,
 		prop,
 		value
@@ -35,14 +35,18 @@ const updateMember = (member, prop, value) => {
 }
 
 const sendCreateMember = (member, socket) => {
-	const payload = { type: 'create' }
+	const payload = { action: 'create' }
 	Object.assign(payload, member.state)
 	send(socket, payload)
 }
 
 const sendDeleteMember = (memberId, socket) => {
-	console.log('delete!', memberId)
-	const payload = { type: 'delete', memberId }
+	const payload = { action: 'delete', memberId }
+	send(socket, payload)
+}
+
+const sendStart = (url, socket) => {
+	const payload = { action: 'start', url }
 	send(socket, payload)
 }
 
@@ -83,7 +87,7 @@ server.on('connection', (socket, upgReq) => {
 						sendCreateMember(partyMemberA, member.socket)						
 					})
 				} else {
-					send(socket, { type: 'party-not-found' })
+					send(socket, { action: 'party-not-found' })
 				}
 
 			}
@@ -98,6 +102,23 @@ server.on('connection', (socket, upgReq) => {
 				}
 
 				socket.close()
+			}
+
+			if (message.action === 'start') {
+				const party = state.party
+				if (!party || party.leader !== state.member) {
+					console.log('Failed to start, not in party or not leader.')
+				} else {
+					// TODO!! contact matchmaker or master server and select a server!		
+					const url = `https://us-west-5.sharkz.io/3`
+					party.members.forEach(partyMember => {
+						sendStart(url, partyMember.socket)
+					})
+
+					// optional: is your party a lobby that ends after joining a game?
+					// then close all of this parties' sockets
+				}
+		
 			}
 		} catch (err) {
 			console.log('error responding to client', jsonObj, err)
