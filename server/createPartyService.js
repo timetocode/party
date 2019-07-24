@@ -147,7 +147,9 @@ const create = (config) => {
 				}
 
 				if (message.action === 'leaveParty') {
-					removePlayerFromParty(message.partyId, message.memberId)
+					if (state.party && state.member) {
+						removePlayerFromParty(state.party.id, state.member.state.id)
+					}					
 					socket.close()
 				}
 
