@@ -5,12 +5,11 @@ import {
 	start,
 	submitChange,
 	partyEvents
-} from './client'
+} from '../client/client'
 
 import render from './render'
 
 const updatePartyQuerystring = (partyId) => {
-	console.log('query string changing...')
 	let newurl = window.location.protocol + "//" + window.location.host
 	if (!partyId) {
 		window.history.replaceState({ path: newurl }, '', newurl)
@@ -34,7 +33,6 @@ const resetState = () => {
 	state.members = new Map()
 }
 
-
 partyEvents.on('identity', identity => {
 	state.partyId = identity.partyId
 	state.memberId = identity.memberId
@@ -51,12 +49,10 @@ partyEvents.on('create', member => {
 })
 
 partyEvents.on('update', (id, prop, value) => {
-	console.log('update', id, prop, value)
 	const member = state.members.get(id)
 	if (member) {
 		member[prop] = value
 	}
-	//state.members.set(member.id, member)
 	render(state)
 })
 
@@ -76,35 +72,33 @@ partyEvents.on('party-not-found', () => {
 	updatePartyQuerystring(null)
 })
 
+partyEvents.on('start', (payload) => {
+	console.log('start', payload)
+	// TODO launch an actual game
+	// e.g. startGame(payload.url, state.PartyId)
+})
+
 window.onload = () => {
-	/**
-	 * `party` is in the url: join that party
-	 * `createParty` button pressed: create a new party
-	 * `leaveParty` button pressed: leave the party
-	 */
 	const urlParams = new URLSearchParams(window.location.search)
 	const partyId = urlParams.get('party')
 
 	let socket = null
 	if (partyId) {
-		console.log('did not bind create', partyId)
-		socket = joinParty(partyId, window.localStorage.getItem('memberId'))
+		socket = joinParty('ws://localhost:8888', partyId, window.localStorage.getItem('memberId'))
 	} 
 
 	document.getElementById('createParty').addEventListener('click', () => {
 		if (!state.partyId) {
-			socket = createParty()
+			socket = createParty('ws://localhost:8888')
 		}	
 	})
 
 	document.getElementById('leaveParty').addEventListener('click', () => {
-		leaveParty(socket, state.partyId, state.memberId)
+		leaveParty(socket)
 	})
 
 	document.getElementById('start').addEventListener('click', () => {
-		start(socket, state.partyId, (url) => {
-			console.log('told to start game!!', url)
-		})
+		start(socket)
 	})
 
 	document.getElementById('submitName').addEventListener('click', () => {

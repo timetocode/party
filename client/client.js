@@ -1,13 +1,10 @@
-
 import { EventEmitter } from 'events'
 
 const state = {
 	partyId: null,
 	memberId: null,
 	isLeader: false,
-	members: new Map(),
-	startCallback: () =>{},
-	log: []
+	members: new Map()
 }
 
 const resetState = () => {
@@ -16,10 +13,8 @@ const resetState = () => {
 		memberId: null,
 		isLeader: false,
 		members: new Map(),
-		log: []
 	})
 }
-
 
 const partyEvents = new EventEmitter()
 
@@ -35,13 +30,7 @@ const onIdentity = (data) => {
 		state.isLeader = data.isLeader
 	}
 
-	//partyEvents.emit('partyId', state.partyId)
-	//partyEvents.emit('memberId', state.memberId)
-	//partyEvents.emit('isLeader', state.isLeader)
-
 	partyEvents.emit('identity', state)
-
-	state.log.push(`Joined ${data.memberId} of party ${data.partyId}`)
 }
 
 const onDelete = (data) => {
@@ -51,19 +40,15 @@ const onDelete = (data) => {
 }
 
 const onPartyNotFound = () => {
-	state.log.push(`Unable to join party.`)
 	resetState()
 	partyEvents.emit('party-not-found')
-
 }
 
 const onCreate = (data) => {
-	console.log('onCreate', data)
 	const member = Object.assign({}, data)
 	delete member.action
 	state.members.set(member.id, member)
 	partyEvents.emit('create', member)
-	state.log.push(`Member added ${member.id}`)
 }
 
 const onUpdate = (data) => {
@@ -75,12 +60,9 @@ const onUpdate = (data) => {
 }
 
 const onStart = (data) => {
-	const url = data.url
-	console.log('Start GAME!', url)
-	state.log.push(`Start game ${url}`)
-	state.startCallback(url)
-	// TODO: actually launch the game 
-	// also save our partyId and pass it to the server if teams are a thing
+	const payload = Object.assign({}, data)
+	delete payload.action
+	partyEvents.emit('start', payload)
 }
 
 
@@ -109,12 +91,12 @@ const onClose = (event) => {
 	partyEvents.emit('disconnect')
 }
 
-const onError = (event, b, c) => {
-	console.log('socket error', event, b, c)
+const onError = (event) => {
+	console.log('socket error', event)
 }
 
-const joinParty = (partyId, memberId) =>  {
-	const socket = new WebSocket('ws://localhost:8888')
+const joinParty = (wsUrl, partyId, memberId) =>  {
+	const socket = new WebSocket(wsUrl)
 	socket.addEventListener('open', () => {
 		socket.send(JSON.stringify({ action: 'joinParty', partyId, memberId }))
 	})
@@ -124,8 +106,8 @@ const joinParty = (partyId, memberId) =>  {
 	return socket
 }
 
-const createParty = () => {
-	const socket = new WebSocket('ws://localhost:8888')
+const createParty = (wsUrl) => {
+	const socket = new WebSocket(wsUrl)
 	socket.addEventListener('open', () => {
 		socket.send(JSON.stringify({ action: 'createParty' }))
 	})
@@ -135,14 +117,13 @@ const createParty = () => {
 	return socket
 }
 
-const leaveParty = (socket, partyId, memberId) => {
-	socket.send(JSON.stringify({ action: 'leaveParty', partyId, memberId }))
+const leaveParty = (socket) => {
+	socket.send(JSON.stringify({ action: 'leaveParty' }))
 	onClose()
 }
 
-const start = (socket, partyId, startCallback) => {
-	state.startCallback = startCallback
-	socket.send(JSON.stringify({ action: 'start', partyId }))
+const start = (socket) => {
+	socket.send(JSON.stringify({ action: 'start' }))
 }
 
 const submitChange = (socket, prop, value) => {

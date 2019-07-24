@@ -1,9 +1,9 @@
-const create = require('./server')
+const createPartyService = require('../server/createPartyService')
 
-create({
+createPartyService({
 	SERVICE_ID: '1-',
 	PARTY_ID_TOKEN_SIZE: 4,
-	PLAYER_ID_TOKEN_SIZE: 8,	
+	PLAYER_ID_TOKEN_SIZE: 8,
 	port: 8888,
 	idleTimeoutMs: 1000,
 	tickIntervalMs: 2000,
@@ -22,11 +22,10 @@ create({
 			return value
 		},
 	},
-	verbose: true,
 	onStart: (party) => {
 		console.log('party is ready to play!')
 		console.log(party)
-		return  {
+		return {
 			url: `https://us-west-5.sharkz.io/3`
 		}
 	}

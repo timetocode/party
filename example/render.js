@@ -23,22 +23,13 @@ const render = (state) => {
 		if (state.isLeader && member.id !== state.memberId) {
 			const kickButton = document.createElement('button')
 			kickButton.innerText = 'Kick'
-			div.appendChild(kickButton)
-		
+			div.appendChild(kickButton)	
+			kickButton.addEventListener('click', () => {
+				console.log('clicked KICK', member.id)
+			})	
 		}
 		ele('members').appendChild(div)
-
 	})
-
-	// render log
-	/*
-	ele('log').innerHTML = ''
-	state.log.forEach(entry => {
-		const div = document.createElement('div')
-		div.innerText = entry
-		ele('log').append(div)
-	})
-	*/
 }
 
 export default render

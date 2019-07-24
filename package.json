@@ -1,14 +1,14 @@
 {
   "name": "party",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "description": "websocket party service for html5 games",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"npx nodemon index.js\" \"npx parcel index.html\"",
+    "start": "concurrently \"npx nodemon ./example/index.js\" \"npx parcel ./example/index.html\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Alex // timetocode",
-  "license": "ISC",
+  "license": "Apache 2.0",
   "dependencies": {
     "@clusterws/cws": "^0.15.0",
     "nanoid": "^2.0.3"
