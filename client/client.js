@@ -35,7 +35,6 @@ const onIdentity = (data) => {
 
 const onDelete = (data) => {
 	state.members.delete(data.memberId)
-	state.log.push(`Member removed ${data.memberId}`)
 	partyEvents.emit('delete', data.memberId)
 }
 
@@ -65,6 +64,9 @@ const onStart = (data) => {
 	partyEvents.emit('start', payload)
 }
 
+const onKicked = () => {
+	partyEvents.emit('kicked')
+}
 
 /* router */
 const actions = {
@@ -73,7 +75,8 @@ const actions = {
 	delete: onDelete,
 	'party-not-found': onPartyNotFound,
 	start: onStart,
-	update: onUpdate
+	update: onUpdate,
+	kicked: onKicked
 }
 
 const onMessage = (event) => {
@@ -82,7 +85,7 @@ const onMessage = (event) => {
 	if (typeof action === 'function') {
 		action(data)
 	} else {
-		console.log('unknown action sent from party server')
+		console.log('unknown action sent from party server', data)
 	}	
 }
 
@@ -130,11 +133,16 @@ const submitChange = (socket, prop, value) => {
 	socket.send(JSON.stringify({ action: 'submitChange', prop, value }))
 }
 
+const kick = (socket, memberId) => {
+	socket.send(JSON.stringify({ action: 'kick', memberId }))
+}
+
 export {
 	joinParty,
 	createParty,
 	leaveParty,
 	start,
+	kick,
 	partyEvents,
 	submitChange
 }

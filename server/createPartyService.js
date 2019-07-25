@@ -6,6 +6,7 @@ const {
 	sendCreateMember,
 	sendUpdateMember,
 	sendDeleteMember,
+	sendKicked,
 	sendStart
 } = require('./network')
 
@@ -16,7 +17,7 @@ const removePlayerFromParty = (partyId, memberId) => {
 	if (party) {
 		// remove member from everyone's client
 		party.members.forEach(partyMember => {
-			sendDeleteMember(player.state.id, partyMember.socket)
+			sendDeleteMember(partyMember.socket, memberId)
 		})
 		
 		if (newLeader) {
@@ -74,6 +75,25 @@ const start = (state, onStart) => {
 		party.members.forEach(partyMember => {
 			sendStart(partyMember.socket, payload)
 		})
+	}
+}
+
+// kicks a player
+const kick = (state, memberId) => {
+	const party = state.party
+
+	let kickee = null
+	if (party) {
+		kickee = party.members.get(memberId)
+	}
+	// only leader may kick
+	if (party && party.leader === state.member) {
+		removePlayerFromParty(party.id, memberId)
+
+		if (kickee) {
+			sendKicked(kickee.socket)
+			kickee.socket.close()
+		}
 	}
 }
 
@@ -155,6 +175,10 @@ const create = (config) => {
 
 				if (message.action === 'start') {
 					start(state, onStart)
+				}
+
+				if (message.action === 'kick') {
+					kick(state, message.memberId)
 				}
 
 				if (message.action === 'submitChange') {

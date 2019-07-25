@@ -23,13 +23,17 @@ const sendCreateMember = (socket, member) => {
 }
 
 const sendDeleteMember = (socket, memberId) => {
-	const payload = { action: 'delete', memberId }
+	send(socket, { action: 'delete', memberId })
+}
+
+const sendStart = (socket, data) => {
+	const payload = { action: 'start' }
+	Object.assign(payload, data)
 	send(socket, payload)
 }
 
-const sendStart = (socket, url) => {
-	const payload = { action: 'start', url }
-	send(socket, payload)
+const sendKicked = (socket) => {
+	send(socket, { action: 'kicked' })
 }
 
 module.exports = {
@@ -38,5 +42,6 @@ module.exports = {
 	sendCreateMember,
 	sendUpdateMember,
 	sendDeleteMember,
+	sendKicked,
 	sendStart
 }

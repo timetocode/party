@@ -25,7 +25,8 @@ const render = (state) => {
 			kickButton.innerText = 'Kick'
 			div.appendChild(kickButton)	
 			kickButton.addEventListener('click', () => {
-				console.log('clicked KICK', member.id)
+				// ew
+				window.dispatchEvent(new CustomEvent('kick', { detail: member.id }))
 			})	
 		}
 		ele('members').appendChild(div)

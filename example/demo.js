@@ -2,6 +2,7 @@ import {
 	joinParty,
 	createParty,
 	leaveParty,
+	kick,
 	start,
 	submitChange,
 	partyEvents
@@ -32,6 +33,7 @@ const resetState = () => {
 	state.isLeader = false
 	state.members = new Map()
 }
+
 
 partyEvents.on('identity', identity => {
 	state.partyId = identity.partyId
@@ -78,6 +80,12 @@ partyEvents.on('start', (payload) => {
 	// e.g. startGame(payload.url, state.PartyId)
 })
 
+partyEvents.on('kicked', () => {
+	console.log('we got kicked!!!')
+	resetState()
+	render(state)
+})
+
 window.onload = () => {
 	const urlParams = new URLSearchParams(window.location.search)
 	const partyId = urlParams.get('party')
@@ -105,5 +113,10 @@ window.onload = () => {
 		const newName = document.getElementById('name').value
 		console.log('here', newName)
 		submitChange(socket, 'name', newName)
+	})
+
+	// wiring up to the kick buttons
+	window.addEventListener('kick', (ev) => {
+		kick(socket, ev.detail)
 	})
 }
