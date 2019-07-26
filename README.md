@@ -8,6 +8,9 @@ npm start
 ```
 Visit http://localhost:1234 for a crude demo. Making the real ui is left to the game developer. Use multiple browsers to connect multiple users (the demo uses localStorage in a manner that opening multiple tabs will simply be treated as one player).
 
+
+There is also a prettier demo in Vuex+VueJS at [https://github.com/timetocode/vuex-party-example]
+
 ### Description
 A player may create, join, and leave a party. Players who are in a party may send an invite link to other players.
 
